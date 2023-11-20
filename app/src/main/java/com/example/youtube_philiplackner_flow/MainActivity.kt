@@ -19,26 +19,26 @@ class MainActivity : ComponentActivity() {
         setContent {
             Youtube_PhilipLackner_FlowTheme {
                 val viewModel = viewModel<MainViewModel>()
-                val count = viewModel.stateFlow.collectAsState(initial = 0)
+//                val count = viewModel.stateFlow.collectAsState(initial = 0)
                 LaunchedEffect(key1 = true) {
 
                     viewModel.sharedFlow.collect { number ->
-
+                        viewModel.squareNumber(number)
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    Button(
-                        onClick = { viewModel.incrementCounter() }
-                    ) {
-                        Text(
-                            text = "Counter : ${count.value}"
-                        )
-                    }
-                }
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                ) {
+//                    Button(
+//                        onClick = { viewModel.incrementCounter() }
+//                    ) {
+//                        Text(
+//                            text = "Counter : ${count.value}"
+//                        )
+//                    }
+//                }
             }
         }
     }

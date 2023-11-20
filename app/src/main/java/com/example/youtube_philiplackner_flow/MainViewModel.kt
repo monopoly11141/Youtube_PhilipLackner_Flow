@@ -9,10 +9,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    private val dispatchers: DispatcherProvider
+) : ViewModel() {
 
     val countdownFlow = flow<Int> {
         val startValue = 10
@@ -26,69 +29,64 @@ class MainViewModel : ViewModel() {
             emit(currentValue)
         }
 
-    }
+    }.flowOn(dispatchers.main)
 
-    private val _stateFlow = MutableStateFlow(0)
-    val stateFlow = _stateFlow.asStateFlow()
+//    private val _stateFlow = MutableStateFlow(0)
+//    val stateFlow = _stateFlow.asStateFlow()
 
-    private val _sharedFlow = MutableSharedFlow<Int>(replay = 3)
+    private val _sharedFlow = MutableSharedFlow<Int>()
     val sharedFlow = _sharedFlow.asSharedFlow()
 
     fun squareNumber(number: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.main)  {
             _sharedFlow.emit(number * number)
         }
     }
 
-    fun incrementCounter() {
-        _stateFlow.value += 1
-    }
+//    fun incrementCounter() {
+//        _stateFlow.value += 1
+//    }
 
     init {
 
         squareNumber(3)
-        squareNumber(3)
-        squareNumber(3)
-        squareNumber(3)
 
-
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.main)  {
             sharedFlow.collect {
-                delay(2000L)
                 println("First Flow : Received number is $it")
             }
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.main) {
             sharedFlow.collect {
-                delay(3000L)
                 println("Second Flow : Received number is $it")
             }
         }
 
+
     }
 
-    private fun collectFlow() {
-        val flow = flow {
-            delay(250L)
-            emit("Appetizer")
-            delay(1000L)
-            emit("Main dish")
-            delay(100L)
-            emit("Dessert")
-        }
+//    private fun collectFlow() {
+//        val flow = flow {
+//            delay(250L)
+//            emit("Appetizer")
+//            delay(1000L)
+//            emit("Main dish")
+//            delay(100L)
+//            emit("Dessert")
+//        }
 
-        viewModelScope.launch {
-            flow.onEach {
-                println("Flow : $it is delivered")
-            }
-                .conflate()
-                .collect {
-                    println("Flow : Now eating $it")
-                    delay(1500L)
-                    println("Flow : Finished eating $it")
-                }
-        }
+//        viewModelScope.launch(dispatchers.main)  {
+//            flow.onEach {
+//                println("Flow : $it is delivered")
+//            }
+//                .conflate()
+//                .collect {
+//                    println("Flow : Now eating $it")
+//                    delay(1500L)
+//                    println("Flow : Finished eating $it")
+//                }
+//        }
 
 
 //        viewModelScope.launch {
@@ -114,6 +112,6 @@ class MainViewModel : ViewModel() {
 //
 //            println("The result is $reduceResult")
 //        }
-    }
+//    }
 
 }
